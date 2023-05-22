@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: keycloak-service
+
+keycloak:
+  realm: todolist
+  auth-server-url: http://localhost:8080
+  credentials:
+    secret: G1dPErKDmt6zg6Vk9CmdonYSy33C0UsY
+  resource: todolist-app
+
+
+server:
+  port: 0
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
