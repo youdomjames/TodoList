@@ -1,6 +1,8 @@
 package com.task.dto;
 
 import com.task.util.enums.Priority;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +16,10 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TaskRequest {
+    @NotEmpty
     private LocalDateTime taskDateAndTime;
+    @NotNull
+    @NotEmpty
     private String taskTitle;
     private Priority taskPriority;
     private String taskDescription;

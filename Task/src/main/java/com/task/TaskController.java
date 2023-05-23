@@ -3,8 +3,10 @@ package com.task;
 import com.task.dto.TaskRequest;
 import com.task.dto.TaskResponse;
 import com.task.service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,8 +19,14 @@ public record TaskController(TaskService taskService) {
     }
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public TaskResponse getTaskById(String id) {
+    public TaskResponse getTaskById(@PathVariable String id) {
         return taskService.getTask(id);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public TaskResponse createTask(@Valid @RequestBody TaskRequest taskRequest) {
+        return taskService.createTask(taskRequest);
     }
 
     @PatchMapping("/{id}")

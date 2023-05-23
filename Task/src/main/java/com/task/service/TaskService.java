@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,6 +46,7 @@ public record TaskService(TaskRepository taskRepository, UserService userService
         }
 
         Task task = Task.builder()
+                .id(UUID.randomUUID().toString())
                 .taskDateAndTime(taskRequest.getTaskDateAndTime())
                 .taskTitle(taskRequest.getTaskTitle())
                 .taskPriority(taskRequest.getTaskPriority())
