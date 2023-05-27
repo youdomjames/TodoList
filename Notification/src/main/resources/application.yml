@@ -1,0 +1,6 @@
+server:
+  port: 8900
+
+spring:
+  sendgrid:
+    api-key: ${SENDGRID_API_KEY}

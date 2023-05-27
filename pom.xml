@@ -34,6 +34,7 @@
 		<module>Discovery Server</module>
 		<module>Keycloak Admin</module>
 		<module>Gateway</module>
+		<module>Notification</module>
 	</modules>
 
 	<dependencyManagement>

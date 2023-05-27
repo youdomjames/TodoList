@@ -30,11 +30,14 @@ public record TaskService(TaskRepository taskRepository, UserService userService
         return taskRepository.findAll(filter, pageable).map(taskMapper::mapToTaskResponse);
     }
     public TaskResponse createTask(TaskRequest taskRequest) {
+
         Set<Attendant> attendants = new HashSet<>();
+
         if (!taskRequest.getInvitedAttendants().isEmpty()) {
             attendants = taskRequest.getInvitedAttendants().stream().parallel().map(potentialAttendant -> {
                 if (userService.userExists(potentialAttendant.getUserId())) {
-                    return Attendant.builder().userId(potentialAttendant.getUserId()).isEmailSent(false).isInvitationAccepted(false).build();
+                    inviteNewAttendant(potentialAttendant);
+                    return potentialAttendant;
                 }
                 return null;
             }).collect(Collectors.toSet());
@@ -55,8 +58,12 @@ public record TaskService(TaskRepository taskRepository, UserService userService
                 .isCompleted(false)
                 .isAddedToCalendar(isInvitationEmailSent)
                 .build();
-        taskRepository.save(task);
-        return taskMapper.mapToTaskResponse(task);
+
+        return taskMapper.mapToTaskResponse(taskRepository.save(task));
+    }
+
+    private void inviteNewAttendant(Attendant potentialAttendant) {
+        notificationService.inviteNewAttendant(potentialAttendant);
     }
 
     public TaskResponse updateTask(String taskId, TaskRequest taskRequest) {
@@ -73,6 +80,7 @@ public record TaskService(TaskRepository taskRepository, UserService userService
 
     //TODO: Implement isEmailSent()
     private boolean isEmailSent(TaskRequest taskRequest) {
+
         return false;
     }
 }
