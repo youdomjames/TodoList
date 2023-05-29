@@ -1,4 +1,4 @@
-package com.task;
+package com.task.controller;
 
 import com.task.dto.TaskRequest;
 import com.task.dto.TaskResponse;
