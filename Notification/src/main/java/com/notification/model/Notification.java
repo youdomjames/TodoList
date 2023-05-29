@@ -14,7 +14,7 @@ import java.util.ArrayDeque;
 @AllArgsConstructor
 public class Notification {
     private String id;
-    private String notifiedUserId;
+    private String userId;
     @Builder.Default
     private ArrayDeque<PushNotification> notifications = new ArrayDeque<>();
 }
