@@ -4,9 +4,9 @@ spring:
 
 keycloak:
   realm: todolist
-  auth-server-url: http://localhost:8080
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL}
   credentials:
-    secret: G1dPErKDmt6zg6Vk9CmdonYSy33C0UsY
+    secret: ${KEYCLOAK_CREDENTIALS_SECRET}
   resource: todolist-app
 
 
@@ -16,5 +16,5 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVICE_URL}
 
