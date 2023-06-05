@@ -3,14 +3,13 @@ spring:
     name: todo-service
   data:
     mongodb:
+      uri: ${MONGODB_URI}
       database: todolist-db
-      host: localhost
-      port: 27017
 
 server:
-  port: 0
+  port: 8950
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_SERVICE_URL}

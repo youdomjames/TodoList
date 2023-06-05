@@ -8,9 +8,10 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI}
-      database: notification
+      database: todolist-db
 
 eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_SERVICE_URL}
+

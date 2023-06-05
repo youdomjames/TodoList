@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "PushNotification",
+  "namespace": "io.confluent.developer.avro",
+  "fields": [
+    {
+      "name": "title",
+      "type": ["null","string"],
+      "default": null
+    },
+    {
+      "name": "message",
+      "type": ["null","string"],
+      "default": null
+    }
+  ]
+}

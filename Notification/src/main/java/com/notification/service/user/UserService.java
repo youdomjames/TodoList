@@ -1,11 +1,14 @@
 package com.notification.service.user;
 
+import com.notification.dto.URIs;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class UserService {
+public record UserService(WebClient.Builder webClientBuilder) {
 
     public boolean userExists(String userId) {
-        return false;
+        return Boolean.TRUE.equals(webClientBuilder.build().get()
+                .uri(URIs.USERS.concat("/exists/").concat(userId)).retrieve().bodyToMono(Boolean.class).block());
     }
 }

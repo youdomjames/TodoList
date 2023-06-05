@@ -1,86 +1,89 @@
 package com.task.service;
 
-import com.task.dto.Attendant;
-import com.task.dto.TaskRequest;
-import com.task.dto.TaskResponse;
+import com.task.dto.*;
+import com.task.kafka.Producers;
 import com.task.model.Task;
 import com.task.repository.TaskRepository;
 import com.task.util.exception.ObjectDeletionException;
-import com.task.util.exception.ObjectNotFound;
+import com.task.util.exception.ObjectNotFoundException;
 import com.task.util.mapper.TaskMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public record TaskService(TaskRepository taskRepository, UserService userService, TaskMapper taskMapper) {
+public record TaskService(TaskRepository taskRepository, UserService userService, TaskMapper taskMapper, Producers producers) {
 
     public TaskResponse getTask(String taskId) {
-        return taskMapper.mapToTaskResponse(taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFound("Task not found")));
+        return taskMapper.tastToTaskResponse(taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFoundException("Task not found")));
     }
     public Page<TaskResponse> getTasks(String filter, int page, int size, String sortingDirection, String ...sortingFields) {
         Pageable pageable = PageRequest.of(page,size, Sort.by(Sort.Direction.valueOf(sortingDirection), sortingFields));
-        return taskRepository.findAll(filter, pageable).map(taskMapper::mapToTaskResponse);
+        return taskRepository.findAll(filter, pageable).map(taskMapper::tastToTaskResponse);
     }
-    public TaskResponse createTask(TaskRequest taskRequest) {
+    public TaskResponse createTask(TaskRequest taskRequest, String userId) {
 
         Set<Attendant> attendants = new HashSet<>();
-
-        if (!taskRequest.getInvitedAttendants().isEmpty()) {
+        Optional<User> taskCreatorUser = userService.getUserById(userId);
+        //todo: check if task creator is the same as connected user
+        if (!taskRequest.getInvitedAttendants().isEmpty() && taskCreatorUser.isPresent()) {
             attendants = taskRequest.getInvitedAttendants().stream().parallel().map(potentialAttendant -> {
-                if (userService.userExists(potentialAttendant.getUserId())) {
-                    inviteNewAttendant(potentialAttendant);
+                Optional<User> invitationReceiver = userService.getUserById(potentialAttendant.getUserId());
+                if (invitationReceiver.isPresent()) {
+                    inviteNewAttendant(taskRequest, taskCreatorUser.get(), invitationReceiver.get());
+                    potentialAttendant.setEmailSent(true);
                     return potentialAttendant;
                 }
                 return null;
             }).collect(Collectors.toSet());
         }
 
-        boolean isInvitationEmailSent = false;
-        if (taskRequest.isAddToCalendarChecked()) {
-            isInvitationEmailSent = isEmailSent(taskRequest);
-        }
-
         Task task = Task.builder()
                 .id(UUID.randomUUID().toString())
+                .userId(userId)
                 .taskDateAndTime(taskRequest.getTaskDateAndTime())
                 .taskTitle(taskRequest.getTaskTitle())
                 .taskPriority(taskRequest.getTaskPriority())
                 .taskDescription(taskRequest.getTaskDescription())
                 .invitedAttendants(attendants)
                 .isCompleted(false)
-                .isAddedToCalendar(isInvitationEmailSent)
+                .isAddedToCalendar(taskRequest.isAddToCalendarChecked())
                 .build();
-
-        return taskMapper.mapToTaskResponse(taskRepository.save(task));
+        System.out.println("**********Task created: " + taskMapper.tastToTaskResponse(task));
+        return taskMapper.tastToTaskResponse(taskRepository.save(task));
     }
-
-    private void inviteNewAttendant(Attendant potentialAttendant) {
-        notificationService.inviteNewAttendant(potentialAttendant);
+    private void inviteNewAttendant(TaskRequest taskRequest, User sender, User receiver) {
+        io.confluent.developer.avro.EmailDetails emailDetails = io.confluent.developer.avro.EmailDetails.newBuilder()
+                .setTime(taskRequest.getTaskDateAndTime().toLocalTime().toString())
+                .setDate(taskRequest.getTaskDateAndTime().toLocalDate().toString())
+                .setDescription(taskRequest.getTaskDescription())
+                .setReceiverEmail(receiver.getEmail())
+                .setSenderEmail(sender.getEmail())
+                .setReceiverFirstName(receiver.getFirstName())
+                .setReceiverLastName(receiver.getLastName())
+                .setSenderFirstName(sender.getFirstName())
+                .setSenderLastName(sender.getLastName())
+                .setTitle(taskRequest.getTaskTitle())
+                .build();
+        producers.isEmailSent(emailDetails);
     }
-
+    public List<Task> getDailyTasks() {
+        return taskRepository.findAll().stream()
+                .parallel()
+                .filter(task -> task.getTaskDateAndTime().toLocalDate().equals(LocalDate.now()))
+                .toList();
+    }
     public TaskResponse updateTask(String taskId, TaskRequest taskRequest) {
-        Task task = taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFound("Task " + taskId + " not found"));
-        return taskMapper.mapToTaskResponse(taskRepository.save(taskMapper.updateUser(taskRequest, task)));
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new ObjectNotFoundException("Task " + taskId + " not found"));
+        return taskMapper.tastToTaskResponse(taskRepository.save(taskMapper.updateUser(taskRequest, task)));
     }
-
     public void deleteTask(String taskId) {
         taskRepository.deleteById(taskId);
         if (taskRepository.existsById(taskId)) {
             throw new ObjectDeletionException("Task " + taskId + " not deleted");
         }
-    }
-
-    //TODO: Implement isEmailSent()
-    private boolean isEmailSent(TaskRequest taskRequest) {
-
-        return false;
     }
 }

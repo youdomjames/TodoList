@@ -20,6 +20,7 @@ import java.util.Set;
 public class Task {
     @Id
     private String id;
+    private String userId;
     private LocalDateTime taskDateAndTime;
     private String taskTitle;
     private Priority taskPriority;

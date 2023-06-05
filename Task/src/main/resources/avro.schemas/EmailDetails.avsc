@@ -1,0 +1,66 @@
+{
+  "type": "record",
+  "name": "EmailDetails",
+  "namespace": "io.confluent.developer.avro",
+  "fields": [
+    {
+      "name": "receiverEmail",
+      "type": ["null","string"],
+      "default": null
+    },
+    {
+      "name": "senderEmail",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "receiverFirstName",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "receiverLastName",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "senderFirstName",
+      "type": ["null","string"],
+      "default": null
+    },
+    {
+      "name": "senderLastName",
+      "type": ["null","string"],
+      "default": null
+    },
+    {
+      "name": "title",
+      "type": ["null","string"],
+      "default": null
+    },
+    {
+      "name": "description",
+      "type": ["null","string"],
+      "default": null
+    },
+    {
+      "name": "date",
+      "type": ["null","string"],
+      "default": null
+    },
+    {
+      "name": "time",
+      "type": ["null","string"],
+      "default": null
+    }
+  ]
+}

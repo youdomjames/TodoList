@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/tasks")
 public record TaskController(TaskService taskService) {
-    @PostMapping
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<TaskResponse> getTasks(@RequestParam String filter, int page, int size, String sortingDirection, String ...sortingFields) {
+    public Page<TaskResponse> getTasks(@RequestParam String filter, int page, int size,
+                                       String sortingDirection, @RequestParam(name = "sortingField") String ...sortingFields) {
         return taskService.getTasks(filter, page, size, sortingDirection, sortingFields);
     }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public TaskResponse getTaskById(@PathVariable String id) {
@@ -25,8 +27,8 @@ public record TaskController(TaskService taskService) {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskResponse createTask(@Valid @RequestBody TaskRequest taskRequest) {
-        return taskService.createTask(taskRequest);
+    public TaskResponse createTask(@Valid @RequestBody TaskRequest taskRequest, @RequestParam String userId) {
+        return taskService.createTask(taskRequest, userId);
     }
 
     @PatchMapping("/{id}")
