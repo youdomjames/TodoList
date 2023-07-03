@@ -6,10 +6,31 @@ spring:
       uri: ${MONGODB_URI}
       database: todolist-db
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI}
+        registration:
+          keycloak:
+            client-id: ${KEYCLOAK_CLIENT_ID}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET}
+
 server:
-  port: 8950
+  port: 0
 
 eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_SERVICE_URL}
+
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

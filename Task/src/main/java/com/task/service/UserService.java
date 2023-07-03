@@ -1,5 +1,6 @@
 package com.task.service;
 
+import com.task.dto.ConnectedUser;
 import com.task.dto.URIs;
 import com.task.dto.User;
 import org.springframework.stereotype.Service;
@@ -9,13 +10,15 @@ import java.util.Optional;
 
 @Service
 public record UserService(WebClient.Builder webClientBuilder) {
+
     public boolean userExists(String userId) {
         return Boolean.TRUE.equals(webClientBuilder.build().get()
-                .uri(URIs.USERS.concat("/exists/").concat(userId)).retrieve().bodyToMono(Boolean.class).block());
+                .uri(URIs.USERS.concat("/exists/").concat(userId)).headers(header -> header.setBearerAuth(ConnectedUser.getToken())).retrieve().bodyToMono(Boolean.class).block());
     }
 
     public Optional<User> getUserById(String userId) {
         return Optional.ofNullable(webClientBuilder.build().get()
-                .uri(URIs.USERS.concat("/").concat(userId)).retrieve().bodyToMono(User.class).block());
+                .uri(URIs.USERS.concat("/").concat(userId)).headers(header -> header.setBearerAuth(ConnectedUser.getToken())).retrieve().bodyToMono(User.class).block());
     }
+
 }
